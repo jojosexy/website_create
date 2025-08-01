@@ -165,7 +165,7 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     align-items: center;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding-top: 80px;
+    padding-top: 120px;
 }
 
 .hero-container {
@@ -241,6 +241,7 @@ h1, h2, h3, h4, h5, h6 {
 .about {
     padding: 5rem 0;
     background: white;
+    scroll-margin-top: 100px;
 }
 
 .about-content {
@@ -305,6 +306,7 @@ h1, h2, h3, h4, h5, h6 {
 .skills {
     padding: 5rem 0;
     background: #f8f9fa;
+    scroll-margin-top: 100px;
 }
 
 .skills-grid {
@@ -370,6 +372,7 @@ h1, h2, h3, h4, h5, h6 {
 .contact {
     padding: 5rem 0;
     background: white;
+    scroll-margin-top: 100px;
 }
 
 .contact-content {

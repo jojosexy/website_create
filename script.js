@@ -86,37 +86,80 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Form submission handler
-const contactForm = document.querySelector('.contact-form form');
-if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        // Get form data
-        const formData = new FormData(contactForm);
-        const name = formData.get('name');
-        const email = formData.get('email');
-        const subject = formData.get('subject');
-        const message = formData.get('message');
-        
-        // Simple validation
-        if (!name || !email || !subject || !message) {
-            alert('請填寫所有必填欄位');
-            return;
-        }
-        
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            alert('請輸入有效的電子郵件地址');
-            return;
-        }
-        
-        // Show success message (in a real application, you would send this to a server)
-        showNotification('訊息已發送！我會盡快回覆您。', 'success');
-        contactForm.reset();
-    });
-}
+// Form submission handler using Google Apps Script
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function (event) {
+            event.preventDefault(); // 防止表單預設提交
+
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = '發送中...';
+            submitButton.disabled = true;
+
+            // 收集表單資料
+            const formData = new FormData(contactForm);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const subject = formData.get('subject');
+            const message = formData.get('message');
+            
+            // Simple validation
+            if (!name || !email || !subject || !message) {
+                alert('請填寫所有必填欄位');
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('請輸入有效的電子郵件地址');
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+                return;
+            }
+
+            const data = {
+                name: name,
+                email: email,
+                subject: subject,
+                message: message
+            };
+
+            // 發送資料到 Google Apps Script 端點
+            // ⭐ 請將下面網址中的 <Deployment_ID> 替換為你的 Google Apps Script 部署ID
+            fetch('https://script.google.com/macros/s/AKfycbwYwBNRvTDKzDcMcs6PV_B4R6dkN2zelofJVoxO0rim5vQfmsQ_IllNW82NLZA1phfXIg/exec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8' // FormEasy 要求的格式
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('發送失敗');
+                }
+            })
+            .then(data => {
+                showNotification('訊息已成功發送！我會盡快回覆您。', 'success');
+                contactForm.reset();
+            })
+            .catch(error => {
+                console.error('錯誤：', error);
+                showNotification('發送失敗，請稍後再試或直接發送郵件。', 'error');
+            })
+            .finally(() => {
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            });
+        });
+    }
+});
 
 // Notification system
 function showNotification(message, type = 'info') {
